@@ -6,14 +6,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Configuração do Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAgHgJz5MOWpHP5ImRQk8SLKMxHAiF5oIk",
-  authDomain: "clickprato-aut5.firebaseapp.com",
-  databaseURL: "https://clickprato-aut5-default-rtdb.firebaseio.com",
-  projectId: "clickprato-aut5",
-  storageBucket: "clickprato-aut5.firebasestorage.app",
-  messagingSenderId: "875780046357",
-  appId: "1:875780046357:web:84d34a3fbcc8715c83d81c",
-  measurementId: "G-1B51BK5GED"
+  apiKey: "AIzaSyCcAoWOxsYOO2ArFpzUIeKHgM307GPnBBM",
+  authDomain: "appdelivery-39c86.firebaseapp.com",
+  projectId: "appdelivery-39c86",
+  storageBucket: "appdelivery-39c86.firebasestorage.app",
+  messagingSenderId: "910010327512",
+  appId: "1:910010327512:web:1106825570fbaeda1552ad",
+  measurementId: "G-7PBSMRZNYQ"
 };
 
 // Inicializar o Firebase
