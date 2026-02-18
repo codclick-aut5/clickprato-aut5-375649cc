@@ -37,7 +37,7 @@ export async function isDeliveryAreaValid(cep: string): Promise<boolean> {
   
   // Query the faixas_ceps_atendidos table to check if the CEP is within any range
   const { data, error } = await supabase
-    .from('faixas_ceps_atendidos')
+    .from('faixas_ceps_atendidos' as any)
     .select('*')
     .lte('cep_inicio', cleanCep)
     .gte('cep_fim', cleanCep);
