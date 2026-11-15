@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -57,6 +57,7 @@ export type Database = {
           order: number
           paused: boolean
           show_in_category_nav: boolean
+          show_in_nav: boolean
           size_template_id: string | null
           updated_at: string
           visible: boolean
@@ -70,6 +71,7 @@ export type Database = {
           order?: number
           paused?: boolean
           show_in_category_nav?: boolean
+          show_in_nav?: boolean
           size_template_id?: string | null
           updated_at?: string
           visible?: boolean
@@ -83,6 +85,7 @@ export type Database = {
           order?: number
           paused?: boolean
           show_in_category_nav?: boolean
+          show_in_nav?: boolean
           size_template_id?: string | null
           updated_at?: string
           visible?: boolean
@@ -357,44 +360,11 @@ export type Database = {
         }
         Relationships: []
       }
-      empresa_credenciais: {
-        Row: {
-          created_at: string
-          empresa_id: string
-          id: string
-          superfrete_token: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          empresa_id: string
-          id?: string
-          superfrete_token?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          empresa_id?: string
-          id?: string
-          superfrete_token?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "empresa_credenciais_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: true
-            referencedRelation: "empresa_info"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       empresa_info: {
         Row: {
           bairro: string | null
           cep: string
           cidade: string | null
-          cnpj: string | null
           complemento: string | null
           created_at: string | null
           default_altura_cm: number | null
@@ -409,13 +379,10 @@ export type Database = {
           nome: string
           numero: string | null
           pais: string | null
-          pix_chave: string | null
-          pix_cidade: string | null
-          pix_nome_recebedor: string | null
           rua: string | null
-          sobre: string | null
           superfrete_sandbox: boolean
           superfrete_servicos: Json
+          superfrete_token: string | null
           telefone: string | null
           updated_at: string | null
           user_id: string
@@ -425,7 +392,6 @@ export type Database = {
           bairro?: string | null
           cep: string
           cidade?: string | null
-          cnpj?: string | null
           complemento?: string | null
           created_at?: string | null
           default_altura_cm?: number | null
@@ -440,13 +406,10 @@ export type Database = {
           nome: string
           numero?: string | null
           pais?: string | null
-          pix_chave?: string | null
-          pix_cidade?: string | null
-          pix_nome_recebedor?: string | null
           rua?: string | null
-          sobre?: string | null
           superfrete_sandbox?: boolean
           superfrete_servicos?: Json
+          superfrete_token?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id: string
@@ -456,7 +419,6 @@ export type Database = {
           bairro?: string | null
           cep?: string
           cidade?: string | null
-          cnpj?: string | null
           complemento?: string | null
           created_at?: string | null
           default_altura_cm?: number | null
@@ -471,13 +433,10 @@ export type Database = {
           nome?: string
           numero?: string | null
           pais?: string | null
-          pix_chave?: string | null
-          pix_cidade?: string | null
-          pix_nome_recebedor?: string | null
           rua?: string | null
-          sobre?: string | null
           superfrete_sandbox?: boolean
           superfrete_servicos?: Json
+          superfrete_token?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id?: string
@@ -554,13 +513,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fidelidade_historico_regra_id_fkey"
-            columns: ["regra_id"]
-            isOneToOne: false
-            referencedRelation: "fidelidade_regras"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fidelidade_historico_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -579,7 +531,6 @@ export type Database = {
           regra_id: string | null
           telefone_cliente: string
           ultima_atualizacao: string | null
-          user_id: string | null
           valor_gasto_pizzas: number
         }
         Insert: {
@@ -591,7 +542,6 @@ export type Database = {
           regra_id?: string | null
           telefone_cliente: string
           ultima_atualizacao?: string | null
-          user_id?: string | null
           valor_gasto_pizzas?: number
         }
         Update: {
@@ -603,7 +553,6 @@ export type Database = {
           regra_id?: string | null
           telefone_cliente?: string
           ultima_atualizacao?: string | null
-          user_id?: string | null
           valor_gasto_pizzas?: number
         }
         Relationships: []
@@ -718,7 +667,7 @@ export type Database = {
           created_at: string
           deeplink: string | null
           description: string
-          display_order: number
+          display_order: number | null
           frete_gratis: boolean | null
           has_variations: boolean | null
           height_cm: number | null
@@ -757,7 +706,7 @@ export type Database = {
           created_at?: string
           deeplink?: string | null
           description?: string
-          display_order?: number
+          display_order?: number | null
           frete_gratis?: boolean | null
           has_variations?: boolean | null
           height_cm?: number | null
@@ -796,7 +745,7 @@ export type Database = {
           created_at?: string
           deeplink?: string | null
           description?: string
-          display_order?: number
+          display_order?: number | null
           frete_gratis?: boolean | null
           has_variations?: boolean | null
           height_cm?: number | null
@@ -1192,6 +1141,7 @@ export type Database = {
           capi_ativo: boolean
           gtm_container_id: string | null
           id: number
+          meta_access_token: string | null
           meta_pixel_id: string | null
           meta_test_event_code: string | null
           updated_at: string | null
@@ -1200,6 +1150,7 @@ export type Database = {
           capi_ativo?: boolean
           gtm_container_id?: string | null
           id?: number
+          meta_access_token?: string | null
           meta_pixel_id?: string | null
           meta_test_event_code?: string | null
           updated_at?: string | null
@@ -1208,33 +1159,10 @@ export type Database = {
           capi_ativo?: boolean
           gtm_container_id?: string | null
           id?: number
+          meta_access_token?: string | null
           meta_pixel_id?: string | null
           meta_test_event_code?: string | null
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      tags_rastreamento_privado: {
-        Row: {
-          created_at: string
-          id: string
-          meta_access_token: string | null
-          tag_id: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          meta_access_token?: string | null
-          tag_id: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          meta_access_token?: string | null
-          tag_id?: number
-          updated_at?: string
         }
         Relationships: []
       }
@@ -1535,56 +1463,31 @@ export type Database = {
           value: string
         }[]
       }
-      mkt_avg_visit_duration:
-        | {
-            Args: {
-              p_campaign?: string
-              p_end: string
-              p_source?: string
-              p_start: string
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_campaign?: string
-              p_cidade?: string
-              p_end: string
-              p_source?: string
-              p_start: string
-            }
-            Returns: number
-          }
-      mkt_bounce_rate:
-        | {
-            Args: {
-              p_campaign?: string
-              p_end: string
-              p_source?: string
-              p_start: string
-            }
-            Returns: {
-              bounced_new: number
-              bounced_returning: number
-              bounced_sessions: number
-              total_sessions: number
-            }[]
-          }
-        | {
-            Args: {
-              p_campaign?: string
-              p_cidade?: string
-              p_end: string
-              p_source?: string
-              p_start: string
-            }
-            Returns: {
-              bounced_new: number
-              bounced_returning: number
-              bounced_sessions: number
-              total_sessions: number
-            }[]
-          }
+      mkt_avg_visit_duration: {
+        Args: {
+          p_campaign?: string
+          p_cidade?: string
+          p_end: string
+          p_source?: string
+          p_start: string
+        }
+        Returns: number
+      }
+      mkt_bounce_rate: {
+        Args: {
+          p_campaign?: string
+          p_cidade?: string
+          p_end: string
+          p_source?: string
+          p_start: string
+        }
+        Returns: {
+          bounced_new: number
+          bounced_returning: number
+          bounced_sessions: number
+          total_sessions: number
+        }[]
+      }
       mkt_cidade_options: {
         Args: never
         Returns: {
@@ -1662,13 +1565,6 @@ export type Database = {
             }
             Returns: number
           }
-      mkt_utm_options: {
-        Args: never
-        Returns: {
-          kind: string
-          value: string
-        }[]
-      }
       mkt_visit_metrics:
         | {
             Args: {
