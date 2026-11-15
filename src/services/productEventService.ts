@@ -8,6 +8,7 @@ import { getReferrer, getChannel } from '@/utils/referrerCapture';
 import { format, subDays, differenceInCalendarDays } from 'date-fns';
 import { cachedFetch } from './queryCache';
 import { getCategoryMaps } from '@/utils/orderItemCategories';
+import { loadAbandonedCartSummary } from './abandonedCartAggregation';
 
 /**
  * Marco temporal: o painel de inteligência ignora eventos anteriores a esta data,
@@ -962,32 +963,8 @@ export const getAbandonedTicketBreakdown = async (
     ? validPedidos.reduce((sum: number, p: any) => sum + Number(p.valor_total), 0) / validPedidos.length
     : 0;
 
-  // Abandoned ticket: somar price*qty por sessão de abandoned_cart
-  const { data: abandoned } = await supabase
-    .from('product_events' as any)
-    .select('session_id, price, quantity, items')
-    .eq('event_type', 'abandoned_cart')
-    .gte('created_at', startIso)
-    .lte('created_at', endIso);
-
-  const sessionTotals = new Map<string, number>();
-  (abandoned as any[] || []).forEach((row) => {
-    const sid = row.session_id;
-    if (!sid) return;
-    const v = eventTotalValue(row);
-
-
-    sessionTotals.set(sid, (sessionTotals.get(sid) || 0) + v);
-  });
-
-  const abandonedTotals = Array.from(sessionTotals.values()).filter(v => v > 0);
-  const avgAbandonedTicket = abandonedTotals.length
-    ? abandonedTotals.reduce((a, b) => a + b, 0) / abandonedTotals.length
-    : 0;
-  const abandonedCount = abandonedTotals.length;
-  const lostRevenue = avgAbandonedTicket * abandonedCount;
-
-  return { avgRealTicket, avgAbandonedTicket, abandonedCount, lostRevenue };
+  const summary = await fetchAbandonedCartSummary(startIso, endIso);
+  return { avgRealTicket, ...summary };
 };
 
 // ---- Compras efetivadas (etapa 5 do funil) ----
@@ -1309,7 +1286,32 @@ export const getFunnelOverview = async (
 
 // ---- Valor potencial perdido em carrinhos abandonados ----
 
-/** Soma price*quantity de todos os itens dos eventos abandoned_cart no período. */
+const fetchAbandonedCartSummary = (
+  startIso: string,
+  endIso: string,
+  utmSource?: string | null,
+  utmCampaign?: string | null,
+) => loadAbandonedCartSummary(async (kind, offset, limit) => {
+  let query = supabase
+    .from('product_events' as any)
+    .select('id, event_type, product_id, session_id, visitor_id, created_at, price, quantity, items')
+    .eq('event_type', kind === 'abandoned' ? 'abandoned_cart' : 'purchase')
+    .gte('created_at', startIso)
+    .order('created_at', { ascending: true })
+    .order('id', { ascending: true });
+
+  if (kind === 'abandoned') {
+    query = query.lte('created_at', endIso);
+    if (utmSource) query = query.eq('utm_source', utmSource);
+    if (utmCampaign) query = query.eq('utm_campaign', utmCampaign);
+  }
+  // A later purchase may be outside the report period or have different UTMs.
+  const { data, error } = await query.range(offset, offset + limit - 1);
+  if (error) throw error;
+  return (data ?? []) as any[];
+});
+
+/** Último carrinho por sessão, sem compras posteriores e sem multiplicar totais por quantidade. */
 export const getAbandonedCartLostValue = async (
   startDate: string,
   endDate: string,
@@ -1318,24 +1320,12 @@ export const getAbandonedCartLostValue = async (
 ): Promise<number> => {
   const { startIso, endIso } = rangeIso(startDate, endDate);
 
-  let query = supabase
-    .from('product_events' as any)
-    .select('price, quantity, items')
-    .eq('event_type', 'abandoned_cart')
-    .gte('created_at', startIso)
-    .lte('created_at', endIso);
-
-  if (utmSource) query = query.eq('utm_source', utmSource);
-  if (utmCampaign) query = query.eq('utm_campaign', utmCampaign);
-
-  const { data, error } = await query;
-  if (error) {
+  try {
+    return (await fetchAbandonedCartSummary(startIso, endIso, utmSource, utmCampaign)).lostRevenue;
+  } catch (error) {
     console.error('Error fetching abandoned cart lost value:', error);
     return 0;
   }
-
-  return ((data as any[]) || []).reduce((sum, row) => sum + eventTotalValue(row), 0);
-
 };
 
 /** Soma price*quantity dos itens de begin_checkout em sessões que NÃO concluíram a compra. */

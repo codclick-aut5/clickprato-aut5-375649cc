@@ -1,5 +1,7 @@
 # Project Architecture
 
+- Abandoned-cart value and average ticket share a paginated snapshot aggregation; keep the latest cart per session (visitor fallback), distinguish cart totals from legacy unit prices, and exclude later recorded purchases by session/visitor across report dates and attribution filters to avoid counting recovered carts as losses.
+
 - Campaign investments store media spend only; campaign reports reuse `fetchSalesSummary` per campaign and main report dates for dynamic gift CMV and derive CAC/ROAS/LTV:CAC from the combined cost, avoiding frozen or double-counted gifts.
 
 - Resolve scheduled and manual store operation in `useStoreOpen`, with shared React Query caches and an admin-only `configuracoes` override; this keeps both admin controls, public status and checkout aligned without changing weekly hours.

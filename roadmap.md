@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Corrigir valores de carrinhos abandonados: último carrinho por sessão, compras posteriores, totais e paginação; compartilhar cálculo com ticket médio e testar (14 testes aprovados).
+- [ ] Conferir o valor no relatório administrativo — bloqueado: autenticação externa indisponível; comparação dos dados reais de 1–15/11 validada por consulta, sem conferir a tela autenticada.
+
 - [x] Implementar Clientes & LTV com histórico por telefone, filtros de aquisição, indicadores e CSV (Abordagem B).
 - [x] Testar cálculos (22 testes aprovados) e conferir apresentação, busca e CSV com dados controlados em computador/celular; Abordagem A fica para uma etapa futura.
 - [ ] Conferir Clientes & LTV com dados reais na conta administrativa — bloqueado: autenticação externa indisponível; a rota real redirecionou para login.
