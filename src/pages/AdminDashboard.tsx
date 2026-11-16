@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ClipboardList, Settings, LogOut, Calculator, Bike, Percent, Building2, Truck, Gift, Megaphone, BarChart3, Paintbrush, Palette, Brain, Cog, Download, Image as ImageIcon, Armchair, BookOpen, TrendingUp, Printer, Sparkles } from "lucide-react";
+import { ClipboardList, Settings, LogOut, Calculator, Bike, Percent, Building2, Truck, Gift, Megaphone, BarChart3, Paintbrush, Palette, Brain, Cog, Download, Image as ImageIcon, Armchair, BookOpen, TrendingUp, Printer, Sparkles, ShoppingCart } from "lucide-react";
 
 const AdminDashboard = () => {
   const { currentUser, logOut } = useAuth();
@@ -348,6 +348,23 @@ const AdminDashboard = () => {
           <CardContent>
             <Button asChild className="w-full">
               <Link to="/marketing-metrics">Acessar</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 p-3 bg-red-100 rounded-full w-fit">
+              <ShoppingCart className="h-8 w-8 text-red-600" />
+            </div>
+            <CardTitle className="text-xl">Carrinhos Abandonados</CardTitle>
+            <CardDescription>
+              Veja cada carrinho não finalizado e fale com o cliente
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link to="/carrinhos-abandonados">Acessar</Link>
             </Button>
           </CardContent>
         </Card>

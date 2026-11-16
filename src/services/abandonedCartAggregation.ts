@@ -28,10 +28,40 @@ export const abandonedEventValue = (row: AbandonedCartEvent): number =>
     : positiveNumber(row.price) * positiveNumber(row.quantity ?? 1);
 
 /** Only recorded session/visitor identities link recovery; a checkout click is not a purchase. */
+export interface AbandonedCartEntry {
+  key: string;
+  sessionId: string | null;
+  visitorId: string | null;
+  createdAt: string;
+  value: number;
+  items: Array<{ name: string; quantity: number; price: number }>;
+}
+
+const entryItems = (latest: AbandonedCartEvent, legacy: AbandonedCartEvent[]): AbandonedCartEntry['items'] => {
+  if (Array.isArray(latest.items)) {
+    return (latest.items as any[]).map(i => ({
+      name: String(i?.product_name ?? i?.name ?? 'Item'),
+      quantity: positiveNumber(i?.quantity ?? 1) || 1,
+      price: positiveNumber(i?.price),
+    }));
+  }
+  return legacy.map(r => ({ name: String((r as any).product_name ?? r.product_id ?? 'Item'), quantity: positiveNumber(r.quantity ?? 1) || 1, price: positiveNumber(r.price) }));
+};
+
 export const summarizeAbandonedCarts = (
   abandoned: AbandonedCartEvent[],
   purchases: AbandonedCartEvent[],
 ): AbandonedCartSummary => {
+  const totals = listAbandonedCarts(abandoned, purchases).map(e => e.value);
+  const lostRevenue = totals.reduce((sum, value) => sum + value, 0);
+  return { lostRevenue, abandonedCount: totals.length, avgAbandonedTicket: totals.length ? lostRevenue / totals.length : 0 };
+};
+
+/** Same rules as the summary, one entry per unrecovered cart, newest first. */
+export const listAbandonedCarts = (
+  abandoned: AbandonedCartEvent[],
+  purchases: AbandonedCartEvent[],
+): AbandonedCartEntry[] => {
   const latestPurchaseBySession = new Map<string, number>();
   const latestPurchaseByVisitor = new Map<string, number>();
   for (const purchase of purchases) {
@@ -53,8 +83,8 @@ export const summarizeAbandonedCarts = (
     carts.set(key, rows);
   }
 
-  const totals: number[] = [];
-  for (const rows of carts.values()) {
+  const entries: AbandonedCartEntry[] = [];
+  for (const [key, rows] of carts.entries()) {
     rows.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at) || (a.id ?? '').localeCompare(b.id ?? ''));
     const latest = rows[rows.length - 1];
     if (!latest) continue;
@@ -66,6 +96,7 @@ export const summarizeAbandonedCarts = (
     if (recovered) continue;
 
     let value = 0;
+    let legacy: AbandonedCartEvent[] = [];
     if (latest.product_id === 'cart' || Array.isArray(latest.items)) {
       value = abandonedEventValue(latest);
     } else {
@@ -76,18 +107,30 @@ export const summarizeAbandonedCarts = (
         if (row.product_id === 'cart' || Array.isArray(row.items)) products.clear();
         else if (row.product_id) products.set(row.product_id, row);
       }
-      value = [...products.values()].reduce((sum, row) => sum + abandonedEventValue(row), 0);
+      legacy = [...products.values()];
+      value = legacy.reduce((sum, row) => sum + abandonedEventValue(row), 0);
     }
-    if (value > 0) totals.push(value);
+    if (value > 0) entries.push({
+      key,
+      sessionId: latest.session_id ?? null,
+      visitorId: latest.visitor_id ?? null,
+      createdAt: latest.created_at,
+      value,
+      items: entryItems(latest, legacy),
+    });
   }
-  const lostRevenue = totals.reduce((sum, value) => sum + value, 0);
-  return { lostRevenue, abandonedCount: totals.length, avgAbandonedTicket: totals.length ? lostRevenue / totals.length : 0 };
+  return entries.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 };
 
 /** Both queries are paginated; recovery reads are intentionally not attribution/date-end filtered. */
-export const loadAbandonedCartSummary = async (
-  fetchPage: (kind: 'abandoned' | 'purchases', offset: number, limit: number) => Promise<AbandonedCartEvent[]>,
-): Promise<AbandonedCartSummary> => {
+type PageFetcher = (kind: 'abandoned' | 'purchases', offset: number, limit: number) => Promise<AbandonedCartEvent[]>;
+
+export const loadAbandonedCartSummary = async (fetchPage: PageFetcher): Promise<AbandonedCartSummary> => {
+  const { abandoned, purchases } = await loadAbandonedCartEvents(fetchPage);
+  return summarizeAbandonedCarts(abandoned, purchases);
+};
+
+export const loadAbandonedCartEvents = async (fetchPage: PageFetcher) => {
   const load = async (kind: 'abandoned' | 'purchases') => {
     const rows: AbandonedCartEvent[] = [];
     const limit = 1000;
@@ -98,5 +141,5 @@ export const loadAbandonedCartSummary = async (
     }
   };
   const [abandoned, purchases] = await Promise.all([load('abandoned'), load('purchases')]);
-  return summarizeAbandonedCarts(abandoned, purchases);
+  return { abandoned, purchases };
 };

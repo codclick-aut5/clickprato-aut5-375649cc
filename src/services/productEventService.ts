@@ -8,7 +8,7 @@ import { getReferrer, getChannel } from '@/utils/referrerCapture';
 import { format, subDays, differenceInCalendarDays } from 'date-fns';
 import { cachedFetch } from './queryCache';
 import { getCategoryMaps } from '@/utils/orderItemCategories';
-import { loadAbandonedCartSummary } from './abandonedCartAggregation';
+import { loadAbandonedCartSummary, loadAbandonedCartEvents, listAbandonedCarts, type AbandonedCartEntry } from './abandonedCartAggregation';
 
 /**
  * Marco temporal: o painel de inteligência ignora eventos anteriores a esta data,
@@ -1286,15 +1286,15 @@ export const getFunnelOverview = async (
 
 // ---- Valor potencial perdido em carrinhos abandonados ----
 
-const fetchAbandonedCartSummary = (
+const abandonedCartPageFetcher = (
   startIso: string,
   endIso: string,
   utmSource?: string | null,
   utmCampaign?: string | null,
-) => loadAbandonedCartSummary(async (kind, offset, limit) => {
+) => async (kind: 'abandoned' | 'purchases', offset: number, limit: number) => {
   let query = supabase
     .from('product_events' as any)
-    .select('id, event_type, product_id, session_id, visitor_id, created_at, price, quantity, items')
+    .select('id, event_type, product_id, product_name, session_id, visitor_id, created_at, price, quantity, items')
     .eq('event_type', kind === 'abandoned' ? 'abandoned_cart' : 'purchase')
     .gte('created_at', startIso)
     .order('created_at', { ascending: true })
@@ -1309,7 +1309,56 @@ const fetchAbandonedCartSummary = (
   const { data, error } = await query.range(offset, offset + limit - 1);
   if (error) throw error;
   return (data ?? []) as any[];
-});
+};
+
+const fetchAbandonedCartSummary = (
+  startIso: string,
+  endIso: string,
+  utmSource?: string | null,
+  utmCampaign?: string | null,
+) => loadAbandonedCartSummary(abandonedCartPageFetcher(startIso, endIso, utmSource, utmCampaign));
+
+export interface AbandonedCartListEntry extends AbandonedCartEntry {
+  /** Known only when the same visitor has a purchase event with an exact order ID. */
+  customerName: string | null;
+  customerPhone: string | null;
+}
+
+export const getAbandonedCartList = async (startDate: string, endDate: string): Promise<AbandonedCartListEntry[]> => {
+  const { startIso, endIso } = rangeIso(startDate, endDate);
+  const { abandoned, purchases } = await loadAbandonedCartEvents(abandonedCartPageFetcher(startIso, endIso));
+  const entries = listAbandonedCarts(abandoned, purchases);
+
+  const visitorIds = [...new Set(entries.map(e => e.visitorId).filter(Boolean))] as string[];
+  const orderByVisitor = new Map<string, string>();
+  for (let i = 0; i < visitorIds.length; i += 200) {
+    const { data } = await supabase
+      .from('product_events' as any)
+      .select('visitor_id, items, created_at')
+      .eq('event_type', 'purchase')
+      .in('visitor_id', visitorIds.slice(i, i + 200))
+      .order('created_at', { ascending: false })
+      .limit(1000);
+    for (const row of (data ?? []) as any[]) {
+      const orderId = Array.isArray(row.items) ? row.items.find((it: any) => it?.order_id)?.order_id : null;
+      if (orderId && row.visitor_id && !orderByVisitor.has(row.visitor_id)) orderByVisitor.set(row.visitor_id, orderId);
+    }
+  }
+  const orderIds = [...new Set(orderByVisitor.values())];
+  const customerByOrder = new Map<string, { name: string | null; phone: string | null }>();
+  for (let i = 0; i < orderIds.length; i += 200) {
+    const { data } = await supabase
+      .from('pedidos_sabor_delivery')
+      .select('id, nome_cliente, telefone_cliente')
+      .in('id', orderIds.slice(i, i + 200));
+    for (const o of data ?? []) customerByOrder.set(o.id, { name: o.nome_cliente, phone: o.telefone_cliente });
+  }
+  return entries.map(e => {
+    const orderId = e.visitorId ? orderByVisitor.get(e.visitorId) : undefined;
+    const c = orderId ? customerByOrder.get(orderId) : undefined;
+    return { ...e, customerName: c?.name ?? null, customerPhone: c?.phone ?? null };
+  });
+};
 
 /** Último carrinho por sessão, sem compras posteriores e sem multiplicar totais por quantidade. */
 export const getAbandonedCartLostValue = async (

@@ -39,6 +39,7 @@ import MeusPedidos from "./pages/MeusPedidos";
 import Fidelidade from "./pages/Fidelidade";
 import Marketing from "./pages/Marketing";
 import MarketingMetrics from "./pages/MarketingMetrics";
+import CarrinhosAbandonados from "./pages/CarrinhosAbandonados";
 import AdminMetrics from "./pages/AdminMetrics";
 import AdminIntelligence from "./pages/AdminIntelligence";
 import Configuracoes from "./pages/Configuracoes";
@@ -103,6 +104,7 @@ const AppRoutes = () => {
     '/fidelidade',
     '/marketing',
     '/marketing-metrics',
+    '/carrinhos-abandonados',
     '/configuracoes',
     '/impressao',
     '/admin-intelligence',
@@ -192,6 +194,11 @@ const AppRoutes = () => {
         <Route path="/marketing" element={
           <AdminRoute>
             <Marketing />
+          </AdminRoute>
+        } />
+        <Route path="/carrinhos-abandonados" element={
+          <AdminRoute>
+            <CarrinhosAbandonados />
           </AdminRoute>
         } />
         <Route path="/marketing-metrics" element={
