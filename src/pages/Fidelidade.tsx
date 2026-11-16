@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, Pencil, Trash2, Gift, ChevronDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ProgressoClientesDialog } from "@/components/admin/ProgressoClientesDialog";
+import { Users } from "lucide-react";
 import {
   FidelidadeRegra,
   ProdutoRefFid,
@@ -103,6 +105,7 @@ const Fidelidade = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [regraToDelete, setRegraToDelete] = useState<FidelidadeRegra | null>(null);
   const [formData, setFormData] = useState<FormData>(emptyForm);
+  const [progressoOpen, setProgressoOpen] = useState(false);
   const [produtoCatDropdownAberto, setProdutoCatDropdownAberto] = useState(false);
   const [premioCatDropdownAberto, setPremioCatDropdownAberto] = useState(false);
 
@@ -416,7 +419,12 @@ const Fidelidade = () => {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end mb-4">
+      <ProgressoClientesDialog open={progressoOpen} onOpenChange={setProgressoOpen} regras={regras} />
+      <div className="flex justify-end gap-2 mb-4">
+        <Button variant="outline" onClick={() => setProgressoOpen(true)} className="gap-2">
+          <Users className="h-4 w-4" />
+          Progresso dos clientes
+        </Button>
         <Button onClick={() => handleOpenDialog()} className="gap-2">
           <Plus className="h-4 w-4" />
           Nova Regra
