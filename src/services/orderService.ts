@@ -365,7 +365,8 @@ export const updateOrder = async (
   }
 
   // Verificar fidelidade na transição para "delivered"
-      if (updates.status === "delivered" && previous.status !== "delivered") {
+      const FINAL = ["delivered", "completed"];
+      if (updates.status && FINAL.includes(updates.status) && !FINAL.includes(previous.status as string)) {
         try {
           const customerName = previous.customerName || "";
           const customerPhone = previous.customerPhone || "";

@@ -420,7 +420,7 @@ export const verificarFidelidade = async (
           total = excedente > 0 ? excedente : 0;
 
           // Registra histórico (exibido em "Meus Pedidos")
-          await supabase.from("fidelidade_historico").insert({
+          const { error: histErr } = await supabase.from("fidelidade_historico").insert({
             regra_id: regra.id,
             telefone_cliente: customerPhone,
             nome_cliente: customerName,
@@ -429,6 +429,7 @@ export const verificarFidelidade = async (
             premio_concedido: true,
             observacao: `Cupom ${premio.codigo} — ${premio.descricaoPremio}`,
           } as any);
+          if (histErr) console.error("❌ Falha ao registrar histórico de fidelidade:", histErr);
 
           // Dispara webhook
           try {
@@ -463,7 +464,7 @@ export const verificarFidelidade = async (
 
       // Persiste progresso
       if (existing) {
-        await (supabase.from("fidelidade_progresso") as any)
+        const { error: updErr } = await (supabase.from("fidelidade_progresso") as any)
           .update({
             nome_cliente: customerName,
             user_id: userId || (existing as any).user_id || null,
@@ -472,8 +473,9 @@ export const verificarFidelidade = async (
             ultima_atualizacao: agora.toISOString(),
           })
           .eq("id", (existing as any).id);
+        if (updErr) console.error("❌ Falha ao atualizar progresso de fidelidade:", updErr);
       } else {
-        await (supabase.from("fidelidade_progresso") as any).insert({
+        const { error: insErr } = await (supabase.from("fidelidade_progresso") as any).insert({
           telefone_cliente: customerPhone,
           nome_cliente: customerName,
           regra_id: regra.id,
@@ -481,6 +483,7 @@ export const verificarFidelidade = async (
           contagem_pizzas: total,
           eventos: eventos,
         });
+        if (insErr) console.error("❌ Falha ao registrar progresso de fidelidade:", insErr);
       }
 
       if (premioConcedido) {
