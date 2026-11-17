@@ -365,6 +365,7 @@ export type Database = {
           bairro: string | null
           cep: string
           cidade: string | null
+          cnpj: string | null
           complemento: string | null
           created_at: string | null
           default_altura_cm: number | null
@@ -379,7 +380,11 @@ export type Database = {
           nome: string
           numero: string | null
           pais: string | null
+          pix_chave: string | null
+          pix_cidade: string | null
+          pix_nome_recebedor: string | null
           rua: string | null
+          sobre: string | null
           superfrete_sandbox: boolean
           superfrete_servicos: Json
           superfrete_token: string | null
@@ -392,6 +397,7 @@ export type Database = {
           bairro?: string | null
           cep: string
           cidade?: string | null
+          cnpj?: string | null
           complemento?: string | null
           created_at?: string | null
           default_altura_cm?: number | null
@@ -406,7 +412,11 @@ export type Database = {
           nome: string
           numero?: string | null
           pais?: string | null
+          pix_chave?: string | null
+          pix_cidade?: string | null
+          pix_nome_recebedor?: string | null
           rua?: string | null
+          sobre?: string | null
           superfrete_sandbox?: boolean
           superfrete_servicos?: Json
           superfrete_token?: string | null
@@ -419,6 +429,7 @@ export type Database = {
           bairro?: string | null
           cep?: string
           cidade?: string | null
+          cnpj?: string | null
           complemento?: string | null
           created_at?: string | null
           default_altura_cm?: number | null
@@ -433,7 +444,11 @@ export type Database = {
           nome?: string
           numero?: string | null
           pais?: string | null
+          pix_chave?: string | null
+          pix_cidade?: string | null
+          pix_nome_recebedor?: string | null
           rua?: string | null
+          sobre?: string | null
           superfrete_sandbox?: boolean
           superfrete_servicos?: Json
           superfrete_token?: string | null
@@ -531,6 +546,7 @@ export type Database = {
           regra_id: string | null
           telefone_cliente: string
           ultima_atualizacao: string | null
+          user_id: string | null
           valor_gasto_pizzas: number
         }
         Insert: {
@@ -542,6 +558,7 @@ export type Database = {
           regra_id?: string | null
           telefone_cliente: string
           ultima_atualizacao?: string | null
+          user_id?: string | null
           valor_gasto_pizzas?: number
         }
         Update: {
@@ -553,6 +570,7 @@ export type Database = {
           regra_id?: string | null
           telefone_cliente?: string
           ultima_atualizacao?: string | null
+          user_id?: string | null
           valor_gasto_pizzas?: number
         }
         Relationships: []
