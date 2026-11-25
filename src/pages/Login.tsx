@@ -67,12 +67,12 @@ const Login = () => {
 
   return <div className="min-h-screen flex flex-col items-center justify-center bg-muted p-4">
     <div className="w-full max-w-md space-y-5 bg-card text-card-foreground p-6 rounded-lg shadow-md">
-<AuthBrandHeader subtitle="Acesse para concluir seu pedido com segurança" />      <div className="border-2 rounded-lg border-primary bg-primary/10 p-3 text-center space-y-2">
+<AuthBrandHeader />      <div className="border-2 rounded-lg border-primary bg-primary/10 p-3 text-center space-y-2">
         <h2 className="text-lg font-extrabold">Primeira vez pedindo por aqui?</h2>
         <Button asChild size="lg" className="w-full h-11 font-bold"><Link to={registerPath}>Criar meu cadastro agora</Link></Button>
       </div>
       <div className="flex items-center gap-3 text-sm text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>ou entre com sua conta</span><span className="h-px flex-1 bg-border" /></div>
-      {!emailMode && <Alert className="border-primary/40 bg-primary/5"><Info className="h-4 w-4" /><AlertDescription className="space-y-1 text-sm">
+      {!emailMode && <Alert className="border-primary/40 bg-primary/5 px-3 py-2 [&>svg]:left-3 [&>svg]:top-2.5 [&>svg~*]:pl-5"><Info className="h-3 w-3" /><AlertDescription className="space-y-0.5 text-[10px] leading-snug">
         <p><strong>Novidade para facilitar seus pedidos:</strong> agora o acesso é feito com seu número de <strong>WhatsApp</strong> e a mesma senha que você já usava com o e-mail.</p>
         <button type="button" className="font-medium text-primary underline" onClick={() => switchToEmail()}>Ainda prefere usar e-mail? Toque aqui</button>
       </AlertDescription></Alert>}
