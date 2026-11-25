@@ -34,6 +34,8 @@ const Configuracoes = () => {
   const [tempoAbandonedCart, setTempoAbandonedCart] = useState("25");
   const [whatsappVerificationEnabled, setWhatsappVerificationEnabled] = useState(true);
   const [savingWhatsappToggle, setSavingWhatsappToggle] = useState(false);
+  const [passwordConfirmEnabled, setPasswordConfirmEnabled] = useState(true);
+  const [savingPasswordConfirm, setSavingPasswordConfirm] = useState(false);
   const [mensagemAtendimento, setMensagemAtendimento] = useState("");
   const [comunicacaoInstancia, setComunicacaoInstancia] = useState("");
   const [comunicacaoApikey, setComunicacaoApikey] = useState("");
@@ -129,7 +131,7 @@ const Configuracoes = () => {
       const { data, error } = await supabase
         .from("configuracoes")
         .select("chave, valor")
-        .in("chave", ["webhook_pix", "cron_ga4_schedule", "webhook_chatassistant", "mensagem_atendimento", "webhook_status_pedido", "webhook_autenticacao", "webhook_eventos", "webhook_fidelidade", "tempo_disparo_abandoned_cart", "whatsapp_verification_enabled", "comunicacao_instancia", "comunicacao_apikey", "auto_print_on_accept", "auto_print_on_new_order", "stripe_enabled", "stripe_mode", "stripe_publishable_key", "stripe_secret_key", "stripe_webhook_secret", "payment_card_delivery_enabled", "payment_cash_enabled", "pagina_inicial", "som_novo_pedido_enabled", "som_novo_pedido_url", "imprimir_canhoto"]);
+        .in("chave", ["webhook_pix", "cron_ga4_schedule", "webhook_chatassistant", "mensagem_atendimento", "webhook_status_pedido", "webhook_autenticacao", "webhook_eventos", "webhook_fidelidade", "tempo_disparo_abandoned_cart", "whatsapp_verification_enabled", "signup_password_confirmation_enabled", "comunicacao_instancia", "comunicacao_apikey", "auto_print_on_accept", "auto_print_on_new_order", "stripe_enabled", "stripe_mode", "stripe_publishable_key", "stripe_secret_key", "stripe_webhook_secret", "payment_card_delivery_enabled", "payment_cash_enabled", "pagina_inicial", "som_novo_pedido_enabled", "som_novo_pedido_url", "imprimir_canhoto"]);
 
       if (error) throw error;
 
@@ -145,6 +147,7 @@ const Configuracoes = () => {
           if (row.chave === "tempo_disparo_abandoned_cart" && row.valor) setTempoAbandonedCart(row.valor);
           if (row.chave === "mensagem_atendimento" && row.valor) setMensagemAtendimento(row.valor);
           if (row.chave === "whatsapp_verification_enabled") setWhatsappVerificationEnabled(row.valor !== "false");
+          if (row.chave === "signup_password_confirmation_enabled") setPasswordConfirmEnabled(row.valor !== "false");
           if (row.chave === "comunicacao_instancia" && row.valor) setComunicacaoInstancia(row.valor);
           if (row.chave === "comunicacao_apikey" && row.valor) setComunicacaoApikey(row.valor);
           if (row.chave === "auto_print_on_accept") setAutoPrintOnAccept(row.valor !== "false");
@@ -724,6 +727,39 @@ const Configuracoes = () => {
                       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
                     } finally {
                       setSavingWhatsappToggle(false);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                <div className="space-y-0.5 pr-4">
+                  <Label htmlFor="password_confirm_toggle" className="text-base">Usar Confirmação de Senha no Signup</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Quando habilitado, o cadastro pede para o cliente digitar a senha duas vezes.
+                  </p>
+                </div>
+                <Switch
+                  id="password_confirm_toggle"
+                  checked={passwordConfirmEnabled}
+                  disabled={savingPasswordConfirm}
+                  onCheckedChange={async (checked) => {
+                    setSavingPasswordConfirm(true);
+                    const prev = passwordConfirmEnabled;
+                    setPasswordConfirmEnabled(checked);
+                    try {
+                      const { error } = await supabase
+                        .from("configuracoes")
+                        .upsert(
+                          { chave: "signup_password_confirmation_enabled", valor: checked ? "true" : "false", updated_at: new Date().toISOString() },
+                          { onConflict: "chave" }
+                        );
+                      if (error) throw error;
+                      toast({ title: "Sucesso!", description: `Confirmação de senha ${checked ? "habilitada" : "desabilitada"}.` });
+                    } catch (error: any) {
+                      setPasswordConfirmEnabled(prev);
+                      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+                    } finally {
+                      setSavingPasswordConfirm(false);
                     }
                   }}
                 />

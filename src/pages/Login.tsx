@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCart } from '@/contexts/CartContext';
 import { trackCheckoutLoginCompleted } from '@/utils/trackingEvents';
@@ -29,6 +30,12 @@ const Login = () => {
   const redirect = params.get('redirect');
   const registerPath = redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : '/register';
   const { toast } = useToast();
+
+  const switchToEmail = (prefill = '') => { setEmailMode(true); setEmail(prefill); setError(''); setNotFound(false); };
+  const handlePhoneChange = (value: string) => {
+    if (value.includes('@')) { switchToEmail(value.trim()); return; }
+    setPhone(value);
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -64,10 +71,15 @@ const Login = () => {
         <Button asChild size="lg" className="w-full h-11 font-bold"><Link to={registerPath}>Criar meu cadastro agora</Link></Button>
       </div>
       <div className="flex items-center gap-3 text-sm text-muted-foreground"><span className="h-px flex-1 bg-border" /><span>ou entre com sua conta</span><span className="h-px flex-1 bg-border" /></div>
+      {!emailMode && <Alert className="border-primary/40 bg-primary/5"><Info className="h-4 w-4" /><AlertDescription className="space-y-1 text-sm">
+        <p><strong>Novidade para facilitar seus pedidos:</strong> agora o acesso é feito com seu número de <strong>WhatsApp</strong> e a mesma senha que você já usava com o e-mail.</p>
+        <button type="button" className="font-medium text-primary underline" onClick={() => switchToEmail()}>Ainda prefere usar e-mail? Toque aqui</button>
+      </AlertDescription></Alert>}
       {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
       {notFound && <Button asChild variant="outline" className="w-full"><Link to={registerPath} state={{ phone }}>Criar conta com este WhatsApp</Link></Button>}
+      {notFound && <Button type="button" variant="ghost" className="w-full" onClick={() => switchToEmail()}>Já tinha conta com e-mail? Entrar com e-mail</Button>}
       <form className="space-y-4" onSubmit={handleSubmit}>
-        {emailMode ? <div className="space-y-1.5"><Label htmlFor="email">E-mail</Label><Input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" /><EmailDomainShortcuts value={email} onChange={setEmail} /></div> : <WhatsappField value={phone} onChange={setPhone} />}
+        {emailMode ? <div className="space-y-1.5"><Label htmlFor="email">E-mail</Label><Input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" /><EmailDomainShortcuts value={email} onChange={setEmail} /></div> : <WhatsappField value={phone} onChange={handlePhoneChange} />}
         <PasswordField value={password} onChange={setPassword} />
         <Link to={emailMode ? '/forgot-password?mode=email' : '/forgot-password'} className="block text-sm font-medium text-primary underline">Esqueceu sua senha?</Link>
         <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</Button>

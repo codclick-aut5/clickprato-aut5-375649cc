@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,11 @@ const Register = () => {
   const [phone, setPhone] = useState(prefill.phone || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmEnabled, setConfirmEnabled] = useState(true);
+  useEffect(() => {
+    supabase.from('configuracoes').select('valor').eq('chave', 'signup_password_confirmation_enabled').maybeSingle()
+      .then(({ data }) => { if (data?.valor === 'false') setConfirmEnabled(false); });
+  }, []);
   const [error, setError] = useState('');
   const [exists, setExists] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,7 +45,7 @@ const Register = () => {
   const submit = async (event?: React.FormEvent) => {
     event?.preventDefault();
     setError(''); setExists(false); setCodeError('');
-    if (password !== confirmPassword) { setError('As senhas não coincidem.'); return; }
+    if (confirmEnabled && password !== confirmPassword) { setError('As senhas não coincidem.'); return; }
     setLoading(true);
     try {
       const result = await whatsappAuthRequest('signup-whatsapp', { action: 'start', name, phone: normalizeWhatsapp(phone), password });
@@ -69,7 +75,7 @@ const Register = () => {
       <div className="space-y-1.5"><Label htmlFor="name">Nome</Label><Input id="name" autoComplete="name" minLength={2} maxLength={100} required placeholder="Seu nome completo" value={name} onChange={e => setName(e.target.value)} /></div>
       <WhatsappField value={phone} onChange={setPhone} />
       <PasswordField value={password} onChange={setPassword} newPassword />
-      <PasswordField id="password-confirm" label="Confirmar Senha" value={confirmPassword} onChange={setConfirmPassword} newPassword />
+      {confirmEnabled && <PasswordField id="password-confirm" label="Confirmar Senha" value={confirmPassword} onChange={setConfirmPassword} newPassword />}
       <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Criando conta...' : 'Criar Conta'}</Button>
       <p className="text-xs text-center text-muted-foreground">Ao criar sua conta, você concorda com nossa <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline">Política de Privacidade</a>.</p>
     </form>
