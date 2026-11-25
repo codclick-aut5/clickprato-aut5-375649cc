@@ -1,3 +1,4 @@
+import AuthBrandHeader from '@/components/auth/AuthBrandHeader';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,7 +36,7 @@ export default function ResetPassword() {
     } catch { setError('Não foi possível alterar a senha. Solicite um novo link e tente novamente.'); }
     finally { setLoading(false); }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md bg-card text-card-foreground p-6 rounded-lg shadow-md space-y-5">
+  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md bg-card text-card-foreground p-6 rounded-lg shadow-md space-y-5"><AuthBrandHeader />
     <h1 className="text-2xl font-bold text-center">Redefinir senha</h1>
     {checking ? <p>Verificando link...</p> : done ? <Alert><AlertDescription>Senha alterada com sucesso.</AlertDescription></Alert> : !valid ? <Alert variant="destructive"><AlertDescription>Este link é inválido ou expirou. Solicite um novo link de recuperação.</AlertDescription></Alert> : <form onSubmit={submit} className="space-y-5">
       {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}

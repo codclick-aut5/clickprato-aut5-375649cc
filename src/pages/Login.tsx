@@ -1,3 +1,4 @@
+import AuthBrandHeader from '@/components/auth/AuthBrandHeader';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -66,7 +67,7 @@ const Login = () => {
 
   return <div className="min-h-screen flex flex-col items-center justify-center bg-muted p-4">
     <div className="w-full max-w-md space-y-5 bg-card text-card-foreground p-6 rounded-lg shadow-md">
-      <div className="border-2 rounded-lg border-primary bg-primary/10 p-3 text-center space-y-2">
+<AuthBrandHeader subtitle="Acesse para concluir seu pedido com segurança" />      <div className="border-2 rounded-lg border-primary bg-primary/10 p-3 text-center space-y-2">
         <h2 className="text-lg font-extrabold">Primeira vez pedindo por aqui?</h2>
         <Button asChild size="lg" className="w-full h-11 font-bold"><Link to={registerPath}>Criar meu cadastro agora</Link></Button>
       </div>

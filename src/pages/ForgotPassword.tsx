@@ -1,3 +1,4 @@
+import AuthBrandHeader from '@/components/auth/AuthBrandHeader';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -43,7 +44,7 @@ const ForgotPassword = () => {
     } catch { setError('Não foi possível concluir. Confira seus dados e tente novamente.'); }
     finally { setLoading(false); }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md bg-card text-card-foreground p-6 sm:p-8 rounded-lg shadow-md space-y-6">
+  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md bg-card text-card-foreground p-6 sm:p-8 rounded-lg shadow-md space-y-6"><AuthBrandHeader />
     <h1 className="text-2xl font-extrabold text-center">Esqueceu sua senha?</h1>
     {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
     {message && <Alert><AlertDescription>{message}</AlertDescription></Alert>}

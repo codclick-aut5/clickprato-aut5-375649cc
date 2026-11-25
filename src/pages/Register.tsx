@@ -1,3 +1,4 @@
+import AuthBrandHeader from '@/components/auth/AuthBrandHeader';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -67,7 +68,7 @@ const Register = () => {
     } catch { setCodeError('Não foi possível confirmar o código. Tente novamente.'); }
     finally { setLoading(false); }
   };
-  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md space-y-6 bg-card text-card-foreground p-6 sm:p-8 rounded-lg shadow-md">
+  return <div className="min-h-screen flex items-center justify-center bg-muted p-4"><div className="w-full max-w-md space-y-6 bg-card text-card-foreground p-6 sm:p-8 rounded-lg shadow-md"><AuthBrandHeader subtitle="Crie seu cadastro para pedir mais rápido" />
     <div className="text-center"><h1 className="text-3xl font-extrabold">Criar Conta</h1><p className="mt-2 text-sm text-muted-foreground">Ou <Link to={loginPath} className="font-medium text-primary underline">faça login com sua conta existente</Link></p></div>
     {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
     {exists && <Button asChild variant="outline" className="w-full"><Link to={loginPath} state={{ phone }}>Entrar</Link></Button>}
